@@ -1,0 +1,57 @@
+TASK = {
+    "task_id": "hard-002",
+    "pr_title": "Add JWT auth and user data access endpoint",
+    "pr_description": "Introduces JWT-based authentication and a /users/{id}/data endpoint.",
+    "max_steps_override": 12,
+    "diffs": [
+        {
+            "filename": "auth/jwt_utils.py",
+            "language": "python",
+            "lines": [
+                "import jwt",
+                "",
+                "JWT_SECRET = 'super-secret-jwt-key-1234'",
+                "JWT_ALGORITHM = 'HS256'",
+                "",
+                "def encode_token(payload):",
+                "    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)",
+                "",
+                "def decode_token(token):",
+                "    return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])",
+            ],
+            "changed_line_numbers": [3],
+        },
+        {
+            "filename": "routes/user_data.py",
+            "language": "python",
+            "lines": [
+                "from flask import Blueprint, request, jsonify",
+                "from auth.jwt_utils import decode_token",
+                "",
+                "data_bp = Blueprint('data', __name__)",
+                "",
+                "@data_bp.route('/users/<int:user_id>/data')",
+                "def get_user_data(user_id):",
+                "    token = request.headers.get('Authorization', '').replace('Bearer ', '')",
+                "    payload = decode_token(token)",
+                "    user = db.find_user(user_id)",
+                "    return jsonify(user.sensitive_data)",
+            ],
+            "changed_line_numbers": [6, 10],
+        },
+    ],
+    "ground_truth_bugs": [
+        {
+            "line": 3,
+            "severity": "critical",
+            "description": "Exposed secret: JWT_SECRET is committed as a string literal in auth/jwt_utils.py. This secret must be loaded from an environment variable. Anyone with source access can forge tokens.",
+            "file": "auth/jwt_utils.py",
+        },
+        {
+            "line": 10,
+            "severity": "critical",
+            "description": "IDOR vulnerability: the endpoint fetches user data for any user_id in the URL without checking that the authenticated caller owns that account. Missing ownership check: payload['user_id'] != user_id should result in 403.",
+            "file": "routes/user_data.py",
+        },
+    ],
+}

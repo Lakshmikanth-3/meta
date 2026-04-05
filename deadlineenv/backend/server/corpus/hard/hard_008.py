@@ -1,0 +1,61 @@
+TASK = {
+    "task_id": "hard-008",
+    "pr_title": "Replace plaintext passwords with bcrypt hashing",
+    "pr_description": "Auth module updated to hash passwords. Login comparison updated accordingly.",
+    "max_steps_override": 12,
+    "diffs": [
+        {
+            "filename": "auth/passwords.py",
+            "language": "python",
+            "lines": [
+                "# replace with bcrypt in next sprint",
+                "import hashlib",
+                "",
+                "ADMIN_PASSWORD = 'admin123'",
+                "",
+                "def hash_password(password):",
+                "    return hashlib.md5(password.encode()).hexdigest()",
+                "",
+                "def check_password(stored_hash, provided):",
+                "    return stored_hash == hash_password(provided)",
+            ],
+            "changed_line_numbers": [4, 6, 9],
+        },
+        {
+            "filename": "auth/login.py",
+            "language": "python",
+            "lines": [
+                "from auth.passwords import check_password, ADMIN_PASSWORD",
+                "",
+                "def login(username, password):",
+                "    user = db.find_by_username(username)",
+                "    if user is None:",
+                "        return None",
+                "    if not check_password(user.password_hash, password):",
+                "        return None",
+                "    return user",
+            ],
+            "changed_line_numbers": [7],
+        },
+    ],
+    "ground_truth_bugs": [
+        {
+            "line": 9,
+            "severity": "critical",
+            "description": "Timing attack in password comparison: using == to compare password hashes is vulnerable to timing attacks. Use hmac.compare_digest() for constant-time comparison to prevent side-channel leakage.",
+            "file": "auth/passwords.py",
+        },
+        {
+            "line": 6,
+            "severity": "critical",
+            "description": "MD5 is cryptographically broken and must not be used for password hashing. Passwords must be hashed with bcrypt, scrypt, or argon2 with a per-password salt. MD5 is trivially reversible via rainbow tables.",
+            "file": "auth/passwords.py",
+        },
+        {
+            "line": 4,
+            "severity": "critical",
+            "description": "Admin password committed in source code: ADMIN_PASSWORD = 'admin123' is an exposed secret in the repository. Remove it and load from environment variable only.",
+            "file": "auth/passwords.py",
+        },
+    ],
+}

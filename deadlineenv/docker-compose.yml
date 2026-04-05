@@ -1,0 +1,29 @@
+version: '3.9'
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: server/Dockerfile
+    ports:
+      - "7860:7860"
+    environment:
+      - WORKERS=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:7860
+      - BACKEND_URL=http://backend:7860
+    depends_on:
+      backend:
+        condition: service_healthy
