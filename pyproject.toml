@@ -1,0 +1,14 @@
+[project]
+name = "meta"
+version = "0.1.0"
+description = "Meta Hackathon Project"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "openai",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
