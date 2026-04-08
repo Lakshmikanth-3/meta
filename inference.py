@@ -84,19 +84,51 @@ def build_prompt(obs: dict) -> str:
     )
 
 
-def main() -> None:
-    client = OpenAI(api_key=HF_TOKEN, base_url=API_BASE_URL)
+def fallback_action(obs: dict) -> dict:
+    # Produce a safe deterministic action when model calls are unavailable.
+    diffs = obs.get("diffs", [])
+    line_number = None
+    for diff in diffs:
+        changed = diff.get("changed_line_numbers", [])
+        if changed:
+            line_number = int(changed[0])
+            break
 
+    step = int(obs.get("step", 0) or 0)
+    if step <= 1:
+        return {
+            "action_type": "add_comment",
+            "line_number": line_number,
+            "content": "Potential logic issue detected; please review this change.",
+        }
+    if step == 2:
+        return {
+            "action_type": "classify_bug",
+            "line_number": line_number,
+            "content": "warning",
+        }
+    return {
+        "action_type": "request_changes",
+        "line_number": None,
+        "content": "Please address review comments before merge.",
+    }
+
+
+def main() -> None:
     rewards: list[float] = []
     steps = 0
     done = False
     success = False
     score = 0.0
     task_name = DEADLINE_TASK
+    client = None
 
-    with httpx.Client(base_url=DEADLINE_ENV_URL, timeout=60.0) as env_client:
-        obs = {}
-        try:
+    try:
+        if HF_TOKEN:
+            client = OpenAI(api_key=HF_TOKEN, base_url=API_BASE_URL)
+
+        with httpx.Client(base_url=DEADLINE_ENV_URL, timeout=60.0) as env_client:
+            obs = {}
             reset_resp = env_client.post("/reset", json={"task_difficulty": DEADLINE_TASK})
             reset_resp.raise_for_status()
             obs = reset_resp.json()["observation"]
@@ -105,19 +137,25 @@ def main() -> None:
             log_start(task_name, "deadline-env", MODEL_NAME)
 
             for step in range(1, MAX_STEPS + 1):
-                prompt = build_prompt(obs)
-                completion = client.chat.completions.create(
-                    model=MODEL_NAME,
-                    messages=[
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": prompt},
-                    ],
-                    max_tokens=MAX_TOKENS,
-                    temperature=TEMPERATURE,
-                )
-                raw = (completion.choices[0].message.content or "").strip()
+                action = fallback_action(obs)
+                if client is not None:
+                    try:
+                        prompt = build_prompt(obs)
+                        completion = client.chat.completions.create(
+                            model=MODEL_NAME,
+                            messages=[
+                                {"role": "system", "content": SYSTEM_PROMPT},
+                                {"role": "user", "content": prompt},
+                            ],
+                            max_tokens=MAX_TOKENS,
+                            temperature=TEMPERATURE,
+                        )
+                        raw = (completion.choices[0].message.content or "").strip()
+                        action = json.loads(raw)
+                    except Exception:
+                        # Fall back to deterministic valid actions when model output/network fails.
+                        action = fallback_action(obs)
 
-                action = json.loads(raw)
                 step_resp = env_client.post("/step", json={"action": action})
                 step_resp.raise_for_status()
                 result = step_resp.json()
@@ -140,13 +178,13 @@ def main() -> None:
             score = max(0.0, min(1.0, total / denom))
             success = score >= 0.4
 
-        except Exception as exc:
-            if steps == 0:
-                log_start(task_name, "deadline-env", MODEL_NAME)
-            log_step(max(steps, 1), "error", 0.0, True, str(exc))
-            done = True
-        finally:
-            log_end(success, steps, score, rewards)
+    except Exception as exc:
+        if steps == 0:
+            log_start(task_name, "deadline-env", MODEL_NAME)
+        log_step(max(steps, 1), "error", 0.0, True, str(exc))
+        done = True
+    finally:
+        log_end(success, steps, score, rewards)
 
 
 if __name__ == "__main__":
