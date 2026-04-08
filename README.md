@@ -27,21 +27,37 @@ The AI engine scans for:
 
 ## 🚀 Setup & Installation
 
-### Local Development (Recommended)
+### Option 1: One-Click Start (Recommended)
+This will launch both the Backend and Frontend with a single command:
+1.  **Clone and Configure**:
+    ```bash
+    git clone https://github.com/Lakshmikanth-3/meta
+    cd meta
+    cp .env.example .env
+    # Add your HF_TOKEN to .env
+    ```
+2.  **Run with Python**:
+    ```bash
+    python start.py
+    ```
+
+### Option 2: Manual Local Development
 
 1. **Clone and Configure**:
    ```bash
    git clone https://github.com/Lakshmikanth-3/meta
-   cd meta/deadlineenv
+   cd meta
    cp .env.example .env
-   # Edit .env and .env.local with your HF_TOKEN
+   # Add your HF_TOKEN to .env
    ```
 
 2. **Terminal 1: Start Backend (FastAPI)**:
    ```bash
    cd backend
+   # If using the project's venv:
+   ..\.venv\Scripts\python.exe -m pip install -r requirements.txt
    $env:PYTHONPATH="."
-   ..\..\.venv\Scripts\python.exe -m uvicorn server.app:app --host 0.0.0.0 --port 7860 --reload
+   ..\.venv\Scripts\python.exe -m uvicorn server.app:app --host 0.0.0.0 --port 7860 --reload
    ```
 
 3. **Terminal 2: Start Frontend (Next.js)**:
