@@ -496,7 +496,7 @@ export default function PlaygroundPage() {
           )}
 
           {/* Feature pills */}
-          <div style={{ display: "flex", gap: 10, marginTop: 24, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 10, marginTop: 24, flexWrap: "wrap", marginBottom: 32 }}>
             {["OWASP Top 10", "CWE Top 25", "SQL Injection", "Auth Bypass", "Race Conditions", "Logic Bugs", "Exposed Secrets", "Line-by-line execution"].map((tag) => (
               <span key={tag} style={{ background: C.surf, border: `1px solid ${C.border}`, borderRadius: 20, padding: "4px 12px", fontSize: 11, color: C.ts, fontFamily: "monospace" }}>{tag}</span>
             ))}
@@ -637,6 +637,25 @@ export default function PlaygroundPage() {
                   </div>
                 </div>
               </div>
+              
+              {/* Simulated RL Reward Output */}
+              {verdictVisible && (
+                <div style={{ marginTop: 16, display: 'flex', gap: 12 }}>
+                  <div style={{ flex: 1, background: 'rgba(74, 222, 128, 0.05)', border: '1px solid rgba(74, 222, 128, 0.2)', borderRadius: 6, padding: '10px 12px' }}>
+                    <div style={{ fontSize: 10, color: '#4ade80', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>RL Points Gained</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 'bold', color: '#4ade80' }}>
+                      💎 +{((result.findings?.length || 0) * 0.75 + (result.verdict === 'approve' ? 0.4 : 0.6)).toFixed(2)}
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, background: 'rgba(248, 113, 113, 0.05)', border: '1px solid rgba(248, 113, 113, 0.2)', borderRadius: 6, padding: '10px 12px' }}>
+                    <div style={{ fontSize: 10, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>RL Penalties</div>
+                    <div style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 'bold', color: '#f87171' }}>
+                      ⏱ -{(((result.findings?.length || 0) + 1) * 0.02).toFixed(2)}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {result.summary && verdictVisible && (
                 <div style={{ marginTop: 12, padding: "10px 12px", background: C.code, border: `1px solid ${C.border}`, borderRadius: 6, fontSize: 12, color: C.ts, lineHeight: 1.65 }}>
                   {result.summary}
@@ -698,10 +717,7 @@ export default function PlaygroundPage() {
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #1a2535; border-radius: 2px; }
-        input::placeholder, textarea::placeholder { color: #354060; }
-        select, input, textarea { outline: none; }
-        select:focus, input:focus, textarea:focus { border-color: #00e676 !important; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
       `}</style>
     </div>
   );

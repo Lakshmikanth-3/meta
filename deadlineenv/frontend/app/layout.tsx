@@ -38,16 +38,23 @@ export default function RootLayout({
             <Link href="/" className="font-mono text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 font-semibold text-xl tracking-tighter">
               DeadlineEnv
             </Link>
-            <div className="flex items-center gap-8 text-sm font-medium text-white/60">
-              <Link href="/playground" className="hover:text-white transition-colors duration-300">Playground</Link>
-              <a
-                href="https://github.com/huggingface/open-env"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-white transition-colors duration-300"
-              >
-                GitHub
-              </a>
+            <div className="flex items-center gap-6 text-[12px] font-mono whitespace-nowrap">
+              <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity" title="Reward for finding a correct bug line">
+                <span className="text-green-400">💎 +0.5</span>
+                <span className="text-white/50">Bug</span>
+              </div>
+              <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity" title="Reward for correctly classifying bug severity">
+                <span className="text-green-400">💎 +0.25</span>
+                <span className="text-white/50">Severity</span>
+              </div>
+              <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity" title="Penalty for incorrectly highlighting a clean line">
+                <span className="text-red-400">⚠️ -0.05</span>
+                <span className="text-white/50">False Alarm</span>
+              </div>
+              <div className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity" title="Penalty applied each step to simulate deadline pressure">
+                <span className="text-red-400">⏱ -0.02</span>
+                <span className="text-white/50">Per Step</span>
+              </div>
             </div>
           </nav>
         </header>
