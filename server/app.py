@@ -5,6 +5,7 @@ from openai import OpenAI
 
 app = FastAPI()
 
+# OpenAI-compatible endpoint and model are configurable for hackathon runtime.
 client = OpenAI(
     base_url=os.getenv("API_BASE_URL", "https://router.huggingface.co/v1"),
     api_key=os.getenv("HF_TOKEN"),
