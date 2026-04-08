@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import os
 from openai import OpenAI
+import uvicorn
 
 app = FastAPI()
 
@@ -29,3 +30,12 @@ def infer(request: InferenceRequest):
         messages=[{"role": "user", "content": request.prompt}],
     )
     return {"response": response.choices[0].message.content}
+
+
+def main() -> None:
+    port = int(os.getenv("PORT", "7860"))
+    uvicorn.run("server.app:app", host="0.0.0.0", port=port)
+
+
+if __name__ == "__main__":
+    main()
