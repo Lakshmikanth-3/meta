@@ -2,11 +2,18 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
+import os
+from openai import OpenAI
 
 from models import DeadlineAction, DeadlineObservation, DeadlineState
 from server.deadline_environment import DeadlineEnvironment
 
 app = FastAPI(title="DeadlineEnv", version="1.0.0")
+
+_client = OpenAI(
+    base_url=os.getenv("API_BASE_URL", "https://router.huggingface.co/v1"),
+    api_key=os.getenv("HF_TOKEN"),
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,6 +33,10 @@ class ResetRequest(BaseModel):
 
 class StepRequest(BaseModel):
     action: DeadlineAction
+
+
+class InferenceRequest(BaseModel):
+    prompt: str
 
 
 @app.get("/health")
@@ -66,3 +77,12 @@ def state():
         return s.model_dump()
     except RuntimeError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/infer")
+def infer(req: InferenceRequest):
+    response = _client.chat.completions.create(
+        model=os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct"),
+        messages=[{"role": "user", "content": req.prompt}],
+    )
+    return {"response": response.choices[0].message.content}

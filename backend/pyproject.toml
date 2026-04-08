@@ -1,7 +1,7 @@
 [project]
-name = "meta-backend"
+name = "meta"
 version = "0.1.0"
-description = "Backend project metadata for OpenEnv validation compatibility"
+description = "Meta Hackathon Project"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi",
