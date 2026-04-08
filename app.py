@@ -17,6 +17,10 @@ class InferenceRequest(BaseModel):
 def root():
     return {"status": "ok"}
 
+@app.post("/reset")
+def reset():
+    return {"status": "ok"}
+
 @app.post("/infer")
 def infer(request: InferenceRequest):
     response = client.chat.completions.create(
