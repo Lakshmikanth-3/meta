@@ -1,0 +1,36 @@
+spec_version: 1
+name: deadline-env
+type: environment
+runtime: python
+app: server.app:app
+port: 7860
+metadata:
+  description: "Code review RL environment — AI agent reviews pull request diffs under deadline pressure"
+  tags:
+    - code-review
+    - software-engineering
+    - real-world
+    - text
+  difficulty_range:
+    - easy
+    - medium
+    - hard
+  max_steps: 20
+  action_space: discrete+structured
+  observation_space: text+structured
+tasks:
+  - id: easy
+    description: "Single-file bug hunt — 1 obvious bug in a 20–40 line diff"
+    difficulty: easy
+    max_steps: 20
+    success_threshold: 0.4
+  - id: medium
+    description: "Cross-file refactor review — 1 obvious + 1 hidden cross-file bug"
+    difficulty: medium
+    max_steps: 20
+    success_threshold: 0.4
+  - id: hard
+    description: "Security + logic review under tight deadline — 2–4 bugs including security vulnerability"
+    difficulty: hard
+    max_steps: 12
+    success_threshold: 0.3
