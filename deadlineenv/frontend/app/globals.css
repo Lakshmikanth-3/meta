@@ -9,10 +9,14 @@
 }
 
 body {
-  background-color: #0d0f11;
-  color: #e6edf3;
+  background-color: #050505;
+  background-image: 
+    radial-gradient(ellipse at top, #1a1b26 0%, transparent 80%),
+    radial-gradient(ellipse at bottom right, #110d18 0%, transparent 60%);
+  color: #ededed;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
 code, pre, .font-mono {
@@ -20,19 +24,26 @@ code, pre, .font-mono {
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d0f11;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #30363d;
-  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #484f58;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.glass-panel {
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
