@@ -96,6 +96,23 @@ Run with `Qwen/Qwen2.5-72B-Instruct` via HuggingFace:
 
 ---
 
+## ✅ Pre-Submission Validation
+
+Use the local validator script before submitting to the hackathon portal:
+
+```bash
+bash scripts/validate-submission.sh https://<your-space>.hf.space .
+```
+
+The script checks:
+- HF Space `/reset` endpoint responds with HTTP 200.
+- Docker build succeeds from the detected Dockerfile context.
+- `openenv validate` passes in the repository.
+
+If any step fails, fix it and rerun the command before submitting.
+
+---
+
 ## Acknowledgements
 Built for the OpenEnv Hackathon. Designed for the reality of security engineers who need to find critical bugs before they reach production.
 
