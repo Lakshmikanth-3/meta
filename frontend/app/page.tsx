@@ -63,7 +63,7 @@ const DEMO_LINES = [
   { n: 10, code: "SECRET_KEY = 'my-secret-key-123'",                          sev: "critical" },
 ];
 
-const SEV_COLOR = {
+const SEV_COLOR: Record<string, { bg: string; border: string; dot: string; icon: string }> = {
   critical: { bg: "#ff444420", border: "#ff444440", dot: "#ff4444", icon: "⛔" },
   warning:  { bg: "#ffb30015", border: "#ffb30035", dot: "#ffb300", icon: "⚠" },
 };
