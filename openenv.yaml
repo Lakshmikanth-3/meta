@@ -1,0 +1,10 @@
+name: meta
+version: "1.0"
+description: Meta Hackathon Environment
+
+environment:
+  API_BASE_URL: https://router.huggingface.co/v1
+  MODEL_NAME: Qwen/Qwen2.5-72B-Instruct
+
+space:
+  url: https://huggingface.co/spaces/lakshmikanths/lakshmikanth

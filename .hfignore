@@ -1,0 +1,14 @@
+# Ignore large lock files and local dev artifacts on HF Space
+uv.lock
+backend/uv.lock
+backend/server/uv.lock
+*.lock
+node_modules/
+.next/
+.venv/
+frontend/.next/
+__pycache__/
+*.pyc
+.env
+.env.local
+.env.*
