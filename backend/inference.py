@@ -112,11 +112,22 @@ def build_user_prompt(obs: dict) -> str:
 
 
 def run_episode(task_difficulty: str) -> dict:
+    import time
     with httpx.Client(base_url=ENV_BASE_URL, timeout=60.0) as env_client:
-        reset_resp = env_client.post("/reset", json={"task_difficulty": task_difficulty})
-        reset_resp.raise_for_status()
-        obs = reset_resp.json()["observation"]
-        task_id = obs["task_id"]
+        # Wait for the environment to become ready
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                reset_resp = env_client.post("/reset", json={"task_difficulty": task_difficulty})
+                reset_resp.raise_for_status()
+                obs = reset_resp.json()["observation"]
+                task_id = obs["task_id"]
+                break
+            except Exception as e:
+                print(f"Waiting for env... (attempt {attempt+1}/{max_retries}) | {e}", flush=True)
+                time.sleep(2)
+        else:
+            raise RuntimeError("Environment failed to become ready after 10 seconds.")
 
         log_start(task_id, MODEL_NAME)
 
