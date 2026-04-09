@@ -48,6 +48,50 @@ def _load_corpus():
 _load_corpus()
 
 
+from openai import OpenAI
+
+# Lazy — never crash at module-import time when HF_TOKEN is absent
+_llm_grader_client: Optional[OpenAI] = None
+
+def _get_grader_client() -> OpenAI:
+    global _llm_grader_client
+    if _llm_grader_client is None:
+        _llm_grader_client = OpenAI(
+            base_url=os.getenv("API_BASE_URL", "https://router.huggingface.co/v1"),
+            api_key=os.getenv("HF_TOKEN") or "dummy",
+        )
+    return _llm_grader_client
+
+
+def llm_grade_comment(comment: str, bug_description: str) -> float:
+    """Use an LLM to determine if the comment accurately identifies the bug."""
+    if not os.getenv("HF_TOKEN"):
+        return keyword_overlap(comment, bug_description)
+
+    prompt = f"""
+    You are a judge in a code security review competition.
+    Bug Description: {bug_description}
+    Agent's Comment: {comment}
+
+    Does the agent's comment accurately and helpfully identify the security bug described?
+    Respond with a single number between 0.0 and 1.0.
+    1.0 = Perfect identification and explanation.
+    0.5 = Correct but vague or missing details.
+    0.0 = Totally unrelated or incorrect.
+    Only respond with the number.
+    """
+    try:
+        resp = _get_grader_client().chat.completions.create(
+            model=os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct"),
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=10,
+            temperature=0.0,
+        )
+        val = resp.choices[0].message.content.strip()
+        return min(max(float(val), 0.0), 1.0)
+    except Exception:
+        return keyword_overlap(comment, bug_description)
+
 def keyword_overlap(comment: str, bug_description: str) -> float:
     stop = {"the", "a", "an", "is", "in", "on", "of", "to", "and", "or", "it", "this", "that", "be", "by"}
     c_words = set(comment.lower().split()) - stop
@@ -55,7 +99,6 @@ def keyword_overlap(comment: str, bug_description: str) -> float:
     if not b_words:
         return 0.0
     return len(c_words & b_words) / len(b_words)
-
 
 def severity_adjacent(given: str, correct: str) -> bool:
     order = ["nit", "ok", "warning", "critical"]
@@ -174,9 +217,9 @@ class DeadlineEnvironment:
         if action.action_type == ActionType.ADD_COMMENT:
             if action.line_number in ground_truth_lines:
                 bug = self._get_bug_at_line(action.line_number)
-                overlap = keyword_overlap(action.content, bug["description"])
-                reward += 0.3 * overlap
-                if overlap > 0.6:
+                score = llm_grade_comment(action.content, bug["description"])
+                reward += 0.3 * score
+                if score > 0.6:
                     reward += 0.2
             else:
                 reward -= 0.05

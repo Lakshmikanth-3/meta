@@ -1,4 +1,4 @@
-from server.deadline_environment import keyword_overlap
+from server.deadline_environment import llm_grade_comment
 
 
 def grade_comments(state) -> float:
@@ -9,8 +9,8 @@ def grade_comments(state) -> float:
     for bug in state.ground_truth_bugs:
         for comment in state.comments_so_far:
             if comment.line_number == bug["line"] and comment.action_type.value == "add_comment":
-                overlap = keyword_overlap(comment.content, bug["description"])
-                if overlap > 0.3:
+                score = llm_grade_comment(comment.content, bug["description"])
+                if score > 0.4:
                     found += 1
                     break
     return round(found / len(state.ground_truth_bugs), 4)

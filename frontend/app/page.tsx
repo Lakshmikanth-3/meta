@@ -17,7 +17,7 @@ const FEATURES = [
   {
     icon: "🤖",
     title: "AI Security Engine",
-    desc: "Powered by Claude — the model explains each finding and provides an exact fix.",
+    desc: "Advanced AI engine — the model explains each finding and provides an exact fix.",
   },
   {
     icon: "📄",

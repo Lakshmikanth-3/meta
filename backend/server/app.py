@@ -10,10 +10,18 @@ from server.deadline_environment import DeadlineEnvironment
 
 app = FastAPI(title="DeadlineEnv", version="1.0.0")
 
-_client = OpenAI(
-    base_url=os.getenv("API_BASE_URL", "https://router.huggingface.co/v1"),
-    api_key=os.getenv("HF_TOKEN"),
-)
+# ── Lazy OpenAI client — never crash at import/startup time ───────────────────
+_client: Optional[OpenAI] = None
+
+def _get_llm_client() -> OpenAI:
+    global _client
+    if _client is None:
+        token = os.getenv("HF_TOKEN") or "dummy"
+        _client = OpenAI(
+            base_url=os.getenv("API_BASE_URL", "https://router.huggingface.co/v1"),
+            api_key=token,
+        )
+    return _client
 
 app.add_middleware(
     CORSMiddleware,
@@ -81,7 +89,7 @@ def state():
 
 @app.post("/infer")
 def infer(req: InferenceRequest):
-    response = _client.chat.completions.create(
+    response = _get_llm_client().chat.completions.create(
         model=os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct"),
         messages=[{"role": "user", "content": req.prompt}],
     )
