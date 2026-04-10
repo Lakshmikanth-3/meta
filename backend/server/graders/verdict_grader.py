@@ -4,15 +4,15 @@ def grade_verdict(state) -> float:
     has_critical = len(critical_bugs) > 0
 
     if state.verdict is None:
-        return 0.0  # episode timed out without verdict
+        return 0.01  # episode timed out without verdict
 
     agent_blocked = state.verdict == "request_changes"
 
     if has_critical and agent_blocked:
-        return 1.0
+        return 0.99
     elif has_critical and not agent_blocked:
-        return 0.0
+        return 0.01
     elif not has_critical and not agent_blocked:
-        return 1.0
+        return 0.99
     else:
-        return 0.3  # false positive block
+        return 0.30  # false positive block

@@ -88,7 +88,7 @@ def llm_grade_comment(comment: str, bug_description: str) -> float:
             temperature=0.0,
         )
         val = resp.choices[0].message.content.strip()
-        return min(max(float(val), 0.0), 1.0)
+        return min(max(float(val), 0.01), 0.99)
     except Exception:
         return keyword_overlap(comment, bug_description)
 
@@ -97,8 +97,9 @@ def keyword_overlap(comment: str, bug_description: str) -> float:
     c_words = set(comment.lower().split()) - stop
     b_words = set(bug_description.lower().split()) - stop
     if not b_words:
-        return 0.0
-    return len(c_words & b_words) / len(b_words)
+        return 0.01
+    val = len(c_words & b_words) / len(b_words)
+    return min(max(float(val), 0.01), 0.99)
 
 def severity_adjacent(given: str, correct: str) -> bool:
     order = ["nit", "ok", "warning", "critical"]
