@@ -53,7 +53,8 @@ def health():
 
 
 @app.post("/reset")
-def reset(req: ResetRequest):
+def reset(req: Optional[ResetRequest] = None):
+    req = req or ResetRequest()
     try:
         obs = _env.reset(
             task_difficulty=req.task_difficulty or "easy",
