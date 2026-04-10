@@ -314,8 +314,9 @@ def main() -> None:
                 results.append(result)
             except Exception as exc:
                 print(f"[ERROR] Episode '{task}' failed: {exc}", flush=True)
+                log_end(False, 0, 0.01, [])
                 results.append(
-                    {"task": task, "success": False, "steps": 0, "score": 0.0}
+                    {"task": task, "success": False, "steps": 0, "score": 0.01}
                 )
 
     print(f"\n{'=' * 60}", flush=True)

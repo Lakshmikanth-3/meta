@@ -192,8 +192,13 @@ if __name__ == "__main__":
         print(f"\n{'='*60}", flush=True)
         print(f"Running task: {task}", flush=True)
         print(f"{'='*60}", flush=True)
-        result = run_episode(task)
-        results.append(result)
+        try:
+            result = run_episode(task)
+            results.append(result)
+        except Exception as exc:
+            print(f"[ERROR] Episode '{task}' failed: {exc}", flush=True)
+            log_end(False, 0, 0.01, [])
+            results.append({"task": task, "success": False, "steps": 0, "score": 0.01})
 
     print(f"\n{'='*60}", flush=True)
     print("SUMMARY", flush=True)
