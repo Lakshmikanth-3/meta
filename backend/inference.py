@@ -176,10 +176,13 @@ def run_episode(task_difficulty: str) -> dict:
             step += 1
 
             log_step(step, action["action_type"], reward, done, error)
+        import math
+        normalized_score = 1.0 / (1.0 + math.exp(-total_score))
+        final_score = max(0.001, min(0.999, normalized_score))
 
         success = total_score >= SUCCESS_THRESHOLD
-        log_end(success, step, total_score, rewards)
-        return {"task": task_difficulty, "success": success, "steps": step, "score": total_score}
+        log_end(success, step, final_score, rewards)
+        return {"task": task_difficulty, "success": success, "steps": step, "score": final_score}
 
 
 if __name__ == "__main__":
