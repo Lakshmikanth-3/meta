@@ -7,7 +7,10 @@ Logging format (required by validator):
   [END]   success=<true|false> steps=<n> score=<0.000> rewards=<r1,r2,...>
 
 Environment variables:
-  HF_TOKEN        — Hugging Face API key (required for LLM calls)
+    OXLO_API_KEY    — API key (preferred)
+    OPENAI_API_KEY  — API key fallback
+    API_KEY         — Generic API key fallback
+    HF_TOKEN        — Backward-compatible fallback
   API_BASE_URL    — LLM API endpoint (default: https://router.huggingface.co/v1)
   MODEL_NAME      — Model identifier (default: Qwen/Qwen2.5-72B-Instruct)
   DEADLINE_ENV_URL — Environment base URL (default: http://localhost:7860)
@@ -26,7 +29,13 @@ import httpx
 from openai import OpenAI
 
 # ── Config ─────────────────────────────────────────────────────────────────────
-API_KEY      = os.getenv("HF_TOKEN") or os.getenv("API_KEY", "")
+API_KEY      = (
+    os.getenv("OXLO_API_KEY")
+    or os.getenv("OPENAI_API_KEY")
+    or os.getenv("API_KEY")
+    or os.getenv("HF_TOKEN")
+    or ""
+)
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME   = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 ENV_BASE_URL = os.getenv("DEADLINE_ENV_URL", "http://localhost:7860")
@@ -47,7 +56,7 @@ def get_client() -> OpenAI:
     global _client
     if _client is None:
         if not API_KEY:
-            print("[WARN] HF_TOKEN not set — LLM calls will fail.", flush=True)
+            print("[WARN] No API key set (OXLO_API_KEY/OPENAI_API_KEY/API_KEY/HF_TOKEN) — LLM calls will fail.", flush=True)
         _client = OpenAI(api_key=API_KEY or "dummy", base_url=API_BASE_URL)
     return _client
 
@@ -289,7 +298,7 @@ def run_episode(task_difficulty: str, env_client: httpx.Client) -> dict:
 def main() -> None:
     print(f"[INIT] DeadlineEnv inference — env={ENV_BASE_URL}", flush=True)
     print(f"[INIT] Model: {MODEL_NAME}", flush=True)
-    print(f"[INIT] HF_TOKEN present: {bool(API_KEY)}", flush=True)
+    print(f"[INIT] API key present: {bool(API_KEY)}", flush=True)
 
     # Wait for the environment container to be ready before doing anything else
     try:

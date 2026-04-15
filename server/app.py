@@ -17,13 +17,22 @@ def root():
 # ── Lazy client — created on first request, NOT at import time ─────────────────
 _client = None
 
+
+def _resolve_api_key() -> str:
+    return (
+        os.getenv("OXLO_API_KEY")
+        or os.getenv("OPENAI_API_KEY")
+        or os.getenv("API_KEY")
+        or os.getenv("HF_TOKEN")
+        or "dummy"
+    )
+
 def get_client():
     global _client
     if _client is None:
         from openai import OpenAI
-        api_key = os.getenv("HF_TOKEN") or "dummy"
         base_url = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
-        _client = OpenAI(api_key=api_key, base_url=base_url)
+        _client = OpenAI(api_key=_resolve_api_key(), base_url=base_url)
     return _client
 
 class InferenceRequest(BaseModel):

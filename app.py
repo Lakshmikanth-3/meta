@@ -7,9 +7,18 @@ import uvicorn
 app = FastAPI()
 
 # OpenAI-compatible endpoint and model are configurable for hackathon runtime.
+def _resolve_api_key() -> str | None:
+    return (
+        os.getenv("OXLO_API_KEY")
+        or os.getenv("OPENAI_API_KEY")
+        or os.getenv("API_KEY")
+        or os.getenv("HF_TOKEN")
+    )
+
+
 client = OpenAI(
     base_url=os.getenv("API_BASE_URL", "https://router.huggingface.co/v1"),
-    api_key=os.getenv("HF_TOKEN"),
+    api_key=_resolve_api_key(),
 )
 
 class InferenceRequest(BaseModel):

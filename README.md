@@ -43,7 +43,7 @@ This will launch both the Backend and Frontend with a single command:
     git clone https://github.com/Lakshmikanth-3/meta
     cd meta
     cp .env.example .env
-    # Add your HF_TOKEN to .env
+   # Add your OXLO_API_KEY (or OPENAI_API_KEY/API_KEY/HF_TOKEN) to .env
     ```
 2.  **Run with Python**:
     ```bash
@@ -57,7 +57,7 @@ This will launch both the Backend and Frontend with a single command:
    git clone https://github.com/Lakshmikanth-3/meta
    cd meta
    cp .env.example .env
-   # Add your HF_TOKEN to .env
+   # Add your OXLO_API_KEY (or OPENAI_API_KEY/API_KEY/HF_TOKEN) to .env
    ```
 
 2. **Terminal 1: Start Backend (FastAPI)**:

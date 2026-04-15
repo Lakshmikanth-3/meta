@@ -9,7 +9,10 @@ Logging format:
 Environment variables:
   API_BASE_URL   — LLM API endpoint (default: https://router.huggingface.co/v1)
   MODEL_NAME     — Model identifier (default: Qwen/Qwen2.5-72B-Instruct)
-  HF_TOKEN       — API key
+    OXLO_API_KEY   — API key (preferred)
+    OPENAI_API_KEY — API key fallback
+    API_KEY        — Generic API key fallback
+    HF_TOKEN       — Backward-compatible fallback
   DEADLINE_TASK  — Task difficulty: easy | medium | hard (default: runs all 3)
   DEADLINE_ENV_URL — Environment base URL (default: http://localhost:7860)
 """
@@ -25,7 +28,13 @@ from dotenv import load_dotenv
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY", "")
+API_KEY = (
+    os.getenv("OXLO_API_KEY")
+    or os.getenv("OPENAI_API_KEY")
+    or os.getenv("API_KEY")
+    or os.getenv("HF_TOKEN")
+    or ""
+)
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 ENV_BASE_URL = os.getenv("DEADLINE_ENV_URL", "http://localhost:7860")

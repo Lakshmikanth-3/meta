@@ -53,19 +53,34 @@ from openai import OpenAI
 # Lazy — never crash at module-import time when HF_TOKEN is absent
 _llm_grader_client: Optional[OpenAI] = None
 
+
+def _resolve_api_key() -> str:
+    return (
+        os.getenv("OXLO_API_KEY")
+        or os.getenv("OPENAI_API_KEY")
+        or os.getenv("API_KEY")
+        or os.getenv("HF_TOKEN")
+        or "dummy"
+    )
+
 def _get_grader_client() -> OpenAI:
     global _llm_grader_client
     if _llm_grader_client is None:
         _llm_grader_client = OpenAI(
             base_url=os.getenv("API_BASE_URL", "https://router.huggingface.co/v1"),
-            api_key=os.getenv("HF_TOKEN") or "dummy",
+            api_key=_resolve_api_key(),
         )
     return _llm_grader_client
 
 
 def llm_grade_comment(comment: str, bug_description: str) -> float:
     """Use an LLM to determine if the comment accurately identifies the bug."""
-    if not os.getenv("HF_TOKEN"):
+    if not (
+        os.getenv("OXLO_API_KEY")
+        or os.getenv("OPENAI_API_KEY")
+        or os.getenv("API_KEY")
+        or os.getenv("HF_TOKEN")
+    ):
         return keyword_overlap(comment, bug_description)
 
     prompt = f"""

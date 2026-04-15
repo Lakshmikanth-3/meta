@@ -13,13 +13,22 @@ app = FastAPI(title="DeadlineEnv", version="1.0.0")
 # ── Lazy OpenAI client — never crash at import/startup time ───────────────────
 _client: Optional[OpenAI] = None
 
+
+def _resolve_api_key() -> str:
+    return (
+        os.getenv("OXLO_API_KEY")
+        or os.getenv("OPENAI_API_KEY")
+        or os.getenv("API_KEY")
+        or os.getenv("HF_TOKEN")
+        or "dummy"
+    )
+
 def _get_llm_client() -> OpenAI:
     global _client
     if _client is None:
-        token = os.getenv("HF_TOKEN") or "dummy"
         _client = OpenAI(
             base_url=os.getenv("API_BASE_URL", "https://router.huggingface.co/v1"),
-            api_key=token,
+            api_key=_resolve_api_key(),
         )
     return _client
 
